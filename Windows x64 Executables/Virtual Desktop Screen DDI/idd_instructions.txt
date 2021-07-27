@@ -1,0 +1,28 @@
+Procedure to add a virtual monitor to your system (Windows 10 Only!)
+
+- Download our virtual display driver from https://www.amyuni.com/downloads/usbmmidd.zip[/list]
+- Unpack the zip file to an empty folder, e.g. c:\temp\usbmmidd
+- Make sure you read the License.txt file as with any other software product
+- Open a command prompt window as Administrator (you cannot add a device to your system unless you "Run As Administrator")
+- Run the following commands:
+	cd c:\temp\usbmmid (or whatever destination folder you chose)
+	deviceinstaller64 install usbmmidd.inf usbmmidd
+	(Make sure you see the message that the drivers are signed by Amyuni Technologies Inc. This is a confirmation that the drivers wet through Microsoft driver signing procedure and are virus free)
+	deviceinstaller64 enableidd 1
+
+If you are on a 32-bit system, replace "deviceinstaller64" by "deviceinstaller"
+
+The included batch file usbmmidd.bat runs these commands automatically and selects between the 32- or 64-bit version of deviceinstaller.
+If you are not comfortable opening a command prompt and entering these commands, right-click on usbmmidd.bat and "Run As Administrator."
+
+That's it. You now have a high definition monitor in your Display Settings. The format is fixed for 1920x1080 pixels but you can position the monitor, extend the desktop or do whatever you do with a real monitor.
+
+To deactivate the virtual monitor, run the command:
+deviceinstaller64 enableidd 0
+
+to reactivate it:
+deviceinstaller64 enableidd 1
+
+To completely remove the drivers from your system, you can either go through the Device Manager and uninstall "USB Mobile Monitor Virtual Display", or run the commands:
+deviceinstaller64 stop usbmmidd
+deviceinstaller64 remove usbmmid
