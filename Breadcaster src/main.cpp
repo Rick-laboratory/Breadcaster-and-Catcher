@@ -1,12 +1,12 @@
 #ifndef WIN32_LEAN_AND_MEAN							//C//o//d//e//_//A//r//t//i//s//t//.//
-#define WIN32_LEAN_AND_MEAN							//R//   	Bread caster 		 //L//
-#endif												//i//   	UDP					 //o//
-#include"Cursor_Surveillance.h"						//c//   	LUT	Protocol		 //v//
-#include"Input_Surveillance.h"						//k//		Remote Server  	     //e//
+#define WIN32_LEAN_AND_MEAN							//R//       Bread caster 	 //L//
+#endif										//i//   	UDP		 //o//
+#include"Cursor_Surveillance.h"							//c//  	    LUT Protocol         //v//
+#include"Input_Surveillance.h"							//k//	    Remote Server  	 //e//
 #include"Broadcast_UDP.h"							//.//A//r//m//b//r//u//s//t//e//r//.//
-#include<thread>									//This is my own unique style of coding.
-// Port 9090 has to be allowed within firewall		//Enjoy it because you can read it.
-int main() {										//The flow is not obscured.
+#include<thread>								//This is my own unique style of coding.
+// Port 9090 has to be allowed within firewall					//Enjoy it because you can read it.
+int main() {									//The flow is not obscured.
 	::ShowWindow(::GetConsoleWindow(), SW_HIDE);
 
 	Cursor_Surveillance* CS_Obj = new Cursor_Surveillance;
