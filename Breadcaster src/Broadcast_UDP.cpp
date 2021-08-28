@@ -31,8 +31,5 @@ Broadcast_UDP::~Broadcast_UDP()
 
 void Broadcast_UDP::Broadcast(int message[])
 {
-	var[0] = message[0];
-	var[1] = message[1];
-	var[2] = message[2];
-	sendto(m_socket, (char*)&var, sizeof(var), 0, (sockaddr*)&m_send_addr,sizeof(m_send_addr));
+	sendto(m_socket, (char*)&message, sizeof(3*int), 0, (sockaddr*)&m_send_addr,sizeof(m_send_addr));
 }
