@@ -11,7 +11,7 @@ Broadcast_UDP::Broadcast_UDP()
 		std::cout << "WSAStartup failed with ErrorCode:" << m_error << "\n";
 	}
 
-	m_socket = socket(AF_INET, SOCK_DGRAM, 0);
+	m_socket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
 
 	if (setsockopt(m_socket, SOL_SOCKET, SO_BROADCAST, &m_broadcast, sizeof(m_broadcast)) < 0) {
 		std::cout << "Error setting Broadcast option\n";
