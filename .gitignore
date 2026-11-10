@@ -1,0 +1,8 @@
+build*/
+**/Debug/
+**/Release/
+**/.vs/
+*.user
+*.obj
+*.pdb
+*.idb

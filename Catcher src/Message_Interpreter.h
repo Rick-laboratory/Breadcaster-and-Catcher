@@ -1,21 +1,27 @@
 #pragma once
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
 #include <windows.h>
+#include <bitset>
+#include "command.hpp"
 
-//MI stands for Message Interpreter
-class MI
-{
-private:
-	INPUT Input = { 0 };
-	const int Cursors[14] = { 
-	32512,32650,32515,32649,32651,
-	32513,32648,32646,32643,32645,
-	32642,32644,32516,32514 };
+/// Apply validated commands. Destruction best-effort restores state owned here.
+class MI {
 public:
-	void MouseInput(int*);
-	void Keyboard_Down(int*);
-	void Keyboard_Up(int*);
-	void CursorMove(int*);
-	void MouseWheel(int*);
-	void HideCursor(int*);
-	void ShowCursor(int*);
+    MI() = default;
+    ~MI();
+    MI(const MI&) = delete;
+    MI& operator=(const MI&) = delete;
+    void Execute(const Command& command);
+
+private:
+    void show_cursor();
+    void hide_cursor();
+    bool hidden_ = false;
+    std::bitset<256> pressed_keys_;
+    unsigned pressed_buttons_ = 0;
 };

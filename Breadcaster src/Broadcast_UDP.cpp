@@ -1,38 +1,63 @@
 #include "Broadcast_UDP.h"
-#pragma warning(disable:4996)
-#pragma warning(disable:6387)
-//has to be allowed within firewall
-#define PORT 9009
+#include "binary_protocol.hpp"
 
-Broadcast_UDP::Broadcast_UDP()
-{
-	m_error = WSAStartup(MAKEWORD(2, 2), &m_wsa);
-	if (m_error != 0) {
-		std::cout << "WSAStartup failed with ErrorCode:" << m_error << "\n";
-	}
+#include <ws2tcpip.h>
+#include <stdexcept>
 
-	m_socket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+#ifdef _MSC_VER
+#pragma comment(lib, "Ws2_32.lib")
+#endif
 
-	if (setsockopt(m_socket, SOL_SOCKET, SO_BROADCAST, &m_broadcast, sizeof(m_broadcast)) < 0) {
-		std::cout << "Error setting Broadcast option\n";
-		closesocket(m_socket);
-	}
+namespace {
+std::runtime_error socket_error(const char* operation) {
+    return std::runtime_error(std::string(operation) + " failed: " +
+                              std::to_string(WSAGetLastError()));
+}
+} // namespace
 
-	m_send_addr.sin_family = AF_INET;
-	m_send_addr.sin_port = htons(PORT);
-	m_send_addr.sin_addr.s_addr = inet_addr("255.255.255.255");
+Broadcast_UDP::Broadcast_UDP(std::uint16_t port, const std::string& destination) {
+    if (port == 0) throw std::invalid_argument("The destination port must be nonzero.");
+    destination_.sin_family = AF_INET;
+    destination_.sin_port = htons(port);
+    if (inet_pton(AF_INET, destination.c_str(), &destination_.sin_addr) != 1) {
+        throw std::invalid_argument("The destination must be an IPv4 address.");
+    }
+
+    WSADATA data{};
+    const int startup = WSAStartup(MAKEWORD(2, 2), &data);
+    if (startup != 0) {
+        throw std::runtime_error("WSAStartup failed: " + std::to_string(startup));
+    }
+    try {
+        socket_ = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+        if (socket_ == INVALID_SOCKET) throw socket_error("socket");
+
+        u_long nonblocking = 1;
+        if (ioctlsocket(socket_, FIONBIO, &nonblocking) == SOCKET_ERROR) {
+            throw socket_error("Set nonblocking socket");
+        }
+        const BOOL enabled = TRUE;
+        if (setsockopt(socket_, SOL_SOCKET, SO_BROADCAST,
+                       reinterpret_cast<const char*>(&enabled), sizeof(enabled)) == SOCKET_ERROR) {
+            throw socket_error("setsockopt(SO_BROADCAST)");
+        }
+    } catch (...) {
+        if (socket_ != INVALID_SOCKET) closesocket(socket_);
+        WSACleanup();
+        throw;
+    }
 }
 
-Broadcast_UDP::~Broadcast_UDP()
-{
-	closesocket(m_socket);
-	WSACleanup();
+Broadcast_UDP::~Broadcast_UDP() {
+    closesocket(socket_);
+    WSACleanup();
 }
 
-void Broadcast_UDP::Broadcast(int message[])
-{
-	var[0] = message[0];
-	var[1] = message[1];
-	var[2] = message[2];
-	sendto(m_socket, (char*)&var, sizeof(var), 0, (sockaddr*)&m_send_addr,sizeof(m_send_addr));
+void Broadcast_UDP::Broadcast(const Command& command) const {
+    const auto packet = encode_command(command);
+    const int length = static_cast<int>(packet.size());
+    const int sent = sendto(socket_, packet.data(), length, 0,
+                           reinterpret_cast<const sockaddr*>(&destination_), sizeof(destination_));
+    if (sent == SOCKET_ERROR) throw socket_error("sendto");
+    if (sent != length) throw std::runtime_error("Incomplete datagram send.");
 }

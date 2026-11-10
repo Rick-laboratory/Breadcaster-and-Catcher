@@ -1,14 +1,13 @@
 #pragma once
-#include<Windows.h>
-#define Present_Pos 0
-#define Past_Pos 1
-#define Temp_pos 2
-class Cursor_Surveillance
-{
+#include "Input_Surveillance.h"
+
+class Cursor_Surveillance {
 public:
-	POINT& GetPresentPos() { return CursorPos[Present_Pos]; }
-	bool IsCursorMoved();
+    /// Sample the cursor and enqueue visibility/motion only when their state changes.
+    void Poll(PacketQueue& queue, int region_width);
 private:
-	POINT CursorPos[3];
+    POINT previous_{};
+    bool initialized_ = false;
+    bool remote_ = false;
 };
 

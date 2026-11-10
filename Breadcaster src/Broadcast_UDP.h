@@ -2,21 +2,20 @@
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
-#pragma comment(lib,"Ws2_32.lib")
-#include<WinSock2.h>
-#include <iostream>
-#include<string>
-class Broadcast_UDP
-{
+#include <winsock2.h>
+#include <cstdint>
+#include <string>
+#include "command.hpp"
+
+class Broadcast_UDP {
 public:
-	Broadcast_UDP();
-	~Broadcast_UDP();
-	void Broadcast(int message[]);
+    explicit Broadcast_UDP(std::uint16_t port = 9009,
+                           const std::string& destination = "127.0.0.1");
+    ~Broadcast_UDP();
+    Broadcast_UDP(const Broadcast_UDP&) = delete;
+    Broadcast_UDP& operator=(const Broadcast_UDP&) = delete;
+    void Broadcast(const Command& command) const;
 private:
-	WSADATA m_wsa;
-	SOCKET m_socket;
-	struct sockaddr_in m_send_addr;
-	int m_error = 0;
-	char m_broadcast = '1';
-	int var[3]{ 0,0,0 };
+    SOCKET socket_ = INVALID_SOCKET;
+    sockaddr_in destination_{};
 };
